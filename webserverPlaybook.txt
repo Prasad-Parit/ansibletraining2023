@@ -1,0 +1,36 @@
+ name: Configure Docker and Start HTTPD Server
+  hosts: your_managed_nodes
+  become: true
+  tasks:
+    - name: Install Docker
+      yum:
+        name: docker
+        state: present
+
+    - name: Start and Enable Docker Service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull httpd server image from Docker Hub
+      docker_image:
+        name: httpd
+        source: pull
+
+    - name: Run Docker Container and Expose to Public
+      docker_container:
+        name: my_httpd_container
+        image: httpd
+        ports:
+          - "80:80"
+        restart_policy: always
+
+    - name: Copy HTML code to /var/www/html directory
+      copy:
+        src: path_to_your_html_files
+        dest: /var/www/html
+
+    - name: Start the Web Server
+      command: docker exec my_httpd_container apachectl -DFOREGROUND
+
